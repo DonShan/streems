@@ -28,6 +28,21 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   StreamController _controller = StreamController();
 
+//Add Data by using sink
+  addStreamData() async {
+    for (int i = 0; i < 10; i++) {
+      await Future.delayed(Duration(seconds: 2));
+      _controller.sink.add(i);
+    }
+  }
+
+// To run streem call inside the initState
+  @override
+  void initState() {
+    super.initState();
+    addStreamData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,12 +50,26 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text("App bar"),
       ),
+
+      //Columan wrape with stream builder
       body: Center(
-        child: Column(
-          children: const [
-            Text("Streem Item"),
-          ],
-        ),
+        child: StreamBuilder(
+            stream: _controller.stream,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Text("This is an error");
+              } else if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator.adaptive();
+              }
+              //Passing Stream data into text
+              return Column(
+                children: [
+                  Text(
+                    "${snapshot.data}",
+                  ),
+                ],
+              );
+            }),
       ),
     );
   }
